@@ -5,6 +5,13 @@
 #include <stdint.h>
 class os::Scarlet {
 public:
+  struct FaultContext {
+    uint64_t version, size, fault_address, syndrome;
+    uint64_t registers[31], sp, pc, nzcv;
+  };
+#ifndef ZERO
+  static bool install_fault_handler();
+#endif
   static uintptr_t syscall(uintptr_t number, uintptr_t a0 = 0, uintptr_t a1 = 0, uintptr_t a2 = 0) {
     register uintptr_t x0 asm("x0") = a0;
     register uintptr_t x1 asm("x1") = a1;

@@ -103,6 +103,9 @@ static void *thread_native_entry(Thread *thread) {
 
   // initialize floating point control register
   os::setup_fpu();
+#ifndef ZERO
+  guarantee(os::Scarlet::install_fault_handler(), "Cannot install Scarlet native fault handler");
+#endif
 
 #ifdef __APPLE__
   // register thread with objc gc
@@ -248,6 +251,9 @@ bool os::create_attached_thread(JavaThread* thread) {
 
   // initialize floating point control register
   os::setup_fpu();
+#ifndef ZERO
+  guarantee(os::Scarlet::install_fault_handler(), "Cannot install Scarlet native fault handler");
+#endif
 
   // Initial thread state is RUNNABLE
   osthread->set_state(RUNNABLE);
@@ -504,6 +510,15 @@ jint os::init_2() {
   }
   FLAG_SET_ERGO(ReduceSignalUsage, true);
   FLAG_SET_DEFAULT(UsePerfData, false);
+#ifndef ZERO
+  if ((!FLAG_IS_DEFAULT(VMContinuations) && VMContinuations) ||
+      (!FLAG_IS_DEFAULT(StackReservedPages) && StackReservedPages != 0)) {
+    vm_exit_during_initialization("Scarlet JIT currently requires VMContinuations=false and StackReservedPages=0");
+    return JNI_ERR;
+  }
+  FLAG_SET_DEFAULT(VMContinuations, false);
+  FLAG_SET_DEFAULT(StackReservedPages, 0);
+#endif
   return set_minimum_stack_sizes();
 }
 int os::active_processor_count() {
@@ -531,7 +546,7 @@ void os::init_system_properties_values() {
   Arguments::set_library_path("/lib:/usr/lib");
   if (!set_boot_path('/', ':')) vm_exit_during_initialization("Failed setting boot class path");
 }
-void os::jvm_path(char* buf, jint len) { jio_snprintf(buf, len, "%s/lib/zero/libjvm.a", java_home()); }
+void os::jvm_path(char* buf, jint len) { jio_snprintf(buf, len, "%s/lib/" ZERO_ONLY("zero") NOT_ZERO("server") "/libjvm.a", java_home()); }
 const char* os::get_temp_directory() { return "/tmp"; }
 
 char* os::pd_reserve_memory(size_t size, bool exec) {
@@ -608,8 +623,8 @@ bool os::find(address, outputStream*) { return false; }
 void os::get_summary_os_info(char* buf, size_t len) { jio_snprintf(buf, len, "Scarlet"); }
 void os::print_os_info_brief(outputStream* st) { st->print_cr("Scarlet (native ABI)"); }
 void os::print_os_info(outputStream* st) { print_os_info_brief(st); }
-void os::get_summary_cpu_info(char* buf, size_t len) { jio_snprintf(buf, len, "AArch64 Zero"); }
-void os::pd_print_cpu_info(outputStream* st, char*, size_t) { st->print_cr("AArch64 Zero"); }
+void os::get_summary_cpu_info(char* buf, size_t len) { jio_snprintf(buf, len, "AArch64"); }
+void os::pd_print_cpu_info(outputStream* st, char*, size_t) { st->print_cr("AArch64"); }
 void os::print_memory_info(outputStream* st) {
   physical_memory_size_type free = 0;
   free_memory(free);
@@ -637,11 +652,16 @@ size_t os::_vm_internal_thread_min_stack_allowed = 64 * K;
 size_t os::Posix::default_stack_size(ThreadType) { return 1 * M; }
 address os::current_stack_base() { address bottom; size_t size; Scarlet::stack_region(&bottom, &size); return bottom + size; }
 size_t os::current_stack_size() { address bottom; size_t size; Scarlet::stack_region(&bottom, &size); return size; }
+#ifdef ZERO
 address os::current_stack_pointer() { uintptr_t sp; asm volatile("mov %0, sp" : "=r"(sp)); return (address)sp; }
 frame os::current_frame() { frame fr; fr.set_sp((intptr_t*)current_stack_pointer()); return fr; }
 frame os::get_sender_for_C_frame(frame*) { return frame(); }
 char* os::non_memory_address_word() { return (char*)-1; }
+#endif
+#ifdef ZERO
 address os::fetch_frame_from_context(const void*, intptr_t**, intptr_t**) { return nullptr; }
 frame os::fetch_frame_from_context(const void*) { return frame(); }
 address os::Posix::ucontext_get_pc(const ucontext_t*) { return nullptr; }
 void os::Posix::ucontext_set_pc(ucontext_t*, address) { ShouldNotReachHere(); }
+
+#endif // ZERO: architecture context access lives in os_cpu for JIT

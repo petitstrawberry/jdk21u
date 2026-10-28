@@ -35,7 +35,7 @@ inline bool os::zero_page_read_protected() {
 }
 
 inline bool os::uses_stack_guard_pages() {
-  return false;
+  return NOT_ZERO(true) ZERO_ONLY(false);
 }
 
 inline bool os::must_commit_stack_guard_pages() {

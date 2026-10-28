@@ -8,7 +8,7 @@
 #include "runtime/suspendedThreadTask.hpp"
 #include "utilities/vmError.hpp"
 
-// No asynchronous signal or stack-sampling API is exposed by this Zero port.
+// No asynchronous signal or stack-sampling API is exposed by this port.
 // Return explicit failure for optional operations; never report installed
 // handlers or recovered signals. SafeFetch uses a guarded kernel scalar load.
 JVM_ENTRY_NO_ENV(void*, JVM_RegisterSignal(jint sig, void* handler))
@@ -25,7 +25,7 @@ bool os::signal_thread(Thread*, int, const char*) { return false; }
 void os::run_periodic_checks(outputStream*) {}
 bool os::signal_sent_by_kill(const void*) { return false; }
 void os::print_siginfo(outputStream* st, const void*) { st->print_cr("Native signal information unavailable"); }
-void os::print_signal_handlers(outputStream* st, char*, size_t) { st->print_cr("No POSIX signal handlers (Scarlet Zero)"); }
+void os::print_signal_handlers(outputStream* st, char*, size_t) { st->print_cr("No POSIX signal handlers (Scarlet native)"); }
 const char* os::exception_name(int, char*, size_t) { return nullptr; }
 int os::get_signal_number(const char*) { return -1; }
 void SuspendedThreadTask::internal_do_task() { ShouldNotReachHere(); }

@@ -34,7 +34,7 @@
 #ifdef _WIN32
   // Windows uses Structured Exception Handling
   #include "safefetch_windows.hpp"
-#elif defined(ZERO) || defined (_AIX)
+#elif defined(ZERO) || defined (_AIX) || defined(SCARLET)
   // These platforms implement safefetch via Posix sigsetjmp/longjmp.
   // This is slower than the other methods and uses more thread stack,
   // but its safe and portable.
