@@ -26,6 +26,7 @@
 // no precompiled headers
 #include "runtime/os.hpp"
 #include "runtime/vm_version.hpp"
+#include "runtime/globals_extension.hpp"
 void VM_Version::get_os_cpu_info() {
   // Baseline AArch64 FP/Advanced SIMD, explicitly enabled by Scarlet's kernel.
   // Optional instructions stay disabled until the OS exposes CPU capabilities.
