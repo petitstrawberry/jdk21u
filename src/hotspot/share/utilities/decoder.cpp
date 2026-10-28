@@ -30,7 +30,9 @@
 #include "utilities/vmError.hpp"
 
 #ifndef _WINDOWS
-#if defined(__APPLE__)
+#if defined(SCARLET)
+  // Native symbol decoding is not yet implemented.
+#elif defined(__APPLE__)
   #include "decoder_machO.hpp"
 #elif defined(AIX)
   #include "decoder_aix.hpp"
@@ -61,7 +63,9 @@ AbstractDecoder* Decoder::get_error_handler_instance() {
 
 AbstractDecoder* Decoder::create_decoder() {
   AbstractDecoder* decoder;
-#if defined (__APPLE__)
+#if defined(SCARLET)
+  return &_do_nothing_decoder;
+#elif defined (__APPLE__)
   decoder = new (std::nothrow)MachODecoder();
 #elif defined(AIX)
   decoder = new (std::nothrow)AIXDecoder();

@@ -46,6 +46,13 @@
 #include <pthread.h>
 
 #include <limits.h>
+#ifdef SCARLET
+#include <inttypes.h>
+#include <strings.h>
+#include <alloca.h>
+#include <sys/time.h>
+struct ucontext_t;
+#endif
 #include <errno.h>
 
 #if defined(LINUX) || defined(_ALLBSD_SOURCE)
@@ -79,7 +86,7 @@
   #define NULL_WORD  NULL
 #endif
 
-#if !defined(LINUX) && !defined(_ALLBSD_SOURCE)
+#if !defined(LINUX) && !defined(_ALLBSD_SOURCE) && !defined(SCARLET)
 // Compiler-specific primitive types
 typedef unsigned short     uint16_t;
 #ifndef _UINT32_T
@@ -104,7 +111,7 @@ typedef unsigned int            uintptr_t;
 // checking for nanness
 #if defined(__APPLE__)
 inline int g_isnan(double f) { return isnan(f); }
-#elif defined(LINUX) || defined(_ALLBSD_SOURCE)
+#elif defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(SCARLET)
 inline int g_isnan(float  f) { return isnan(f); }
 inline int g_isnan(double f) { return isnan(f); }
 #else

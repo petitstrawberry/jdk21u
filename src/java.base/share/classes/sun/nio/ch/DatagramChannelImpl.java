@@ -75,6 +75,7 @@ import java.util.function.Consumer;
 import jdk.internal.access.JavaNioAccess;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.ref.CleanerFactory;
+import jdk.internal.util.OperatingSystem;
 import sun.net.ResourceManager;
 import sun.net.ext.ExtendedSocketOptions;
 import sun.net.util.IPAddressUtil;
@@ -473,10 +474,12 @@ class DatagramChannelImpl
                 set.add(StandardSocketOptions.SO_REUSEPORT);
             }
             set.add(StandardSocketOptions.SO_BROADCAST);
-            set.add(StandardSocketOptions.IP_TOS);
-            set.add(StandardSocketOptions.IP_MULTICAST_IF);
-            set.add(StandardSocketOptions.IP_MULTICAST_TTL);
-            set.add(StandardSocketOptions.IP_MULTICAST_LOOP);
+            if (!OperatingSystem.isScarlet()) {
+                set.add(StandardSocketOptions.IP_TOS);
+                set.add(StandardSocketOptions.IP_MULTICAST_IF);
+                set.add(StandardSocketOptions.IP_MULTICAST_TTL);
+                set.add(StandardSocketOptions.IP_MULTICAST_LOOP);
+            }
             set.addAll(ExtendedSocketOptions.datagramSocketOptions());
             return Collections.unmodifiableSet(set);
         }

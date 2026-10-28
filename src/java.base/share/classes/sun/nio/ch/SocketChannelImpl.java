@@ -59,6 +59,7 @@ import static java.net.StandardProtocolFamily.INET;
 import static java.net.StandardProtocolFamily.INET6;
 import static java.net.StandardProtocolFamily.UNIX;
 
+import jdk.internal.util.OperatingSystem;
 import sun.net.ConnectionResetException;
 import sun.net.NetHooks;
 import sun.net.ext.ExtendedSocketOptions;
@@ -333,8 +334,10 @@ class SocketChannelImpl
             set.add(StandardSocketOptions.SO_LINGER);
             set.add(StandardSocketOptions.TCP_NODELAY);
             // additional options required by socket adaptor
-            set.add(StandardSocketOptions.IP_TOS);
-            set.add(ExtendedSocketOption.SO_OOBINLINE);
+            if (!OperatingSystem.isScarlet()) {
+                set.add(StandardSocketOptions.IP_TOS);
+                set.add(ExtendedSocketOption.SO_OOBINLINE);
+            }
             set.addAll(ExtendedSocketOptions.clientSocketOptions());
             return Collections.unmodifiableSet(set);
         }

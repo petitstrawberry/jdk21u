@@ -31,6 +31,7 @@ import jdk.internal.access.JavaIORandomAccessFileAccess;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.misc.Blocker;
 import jdk.internal.util.ByteArray;
+import jdk.internal.util.OperatingSystem;
 import sun.nio.ch.FileChannelImpl;
 
 
@@ -245,6 +246,11 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
             }
         }
         this.rw = rw;
+
+        if (OperatingSystem.isScarlet() && (mode.equals("rws") || mode.equals("rwd"))) {
+            throw new UnsupportedOperationException(
+                "Synchronous random access files are not supported on Scarlet");
+        }
 
         if (openAndDelete)
             imode |= O_TEMPORARY;

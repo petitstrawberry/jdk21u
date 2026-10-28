@@ -50,6 +50,7 @@ import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.util.Objects;
 
+import jdk.internal.util.OperatingSystem;
 import sun.net.ext.ExtendedSocketOptions;
 import sun.net.util.IPAddressUtil;
 import sun.security.action.GetPropertyAction;
@@ -442,8 +443,12 @@ public class Net {
 
         // map option name to platform level/name
         OptionKey key = SocketOptionRegistry.findOption(name, family);
-        if (key == null)
+        if (key == null) {
+            if (OperatingSystem.isScarlet()) {
+                throw new UnsupportedOperationException(name + " is not supported on Scarlet");
+            }
             throw new AssertionError("Option not found");
+        }
 
         int arg;
         if (type == Integer.class) {
@@ -496,8 +501,12 @@ public class Net {
 
         // map option name to platform level/name
         OptionKey key = SocketOptionRegistry.findOption(name, family);
-        if (key == null)
+        if (key == null) {
+            if (OperatingSystem.isScarlet()) {
+                throw new UnsupportedOperationException(name + " is not supported on Scarlet");
+            }
             throw new AssertionError("Option not found");
+        }
 
         boolean mayNeedConversion = (family == UNSPEC);
         int value = getIntOption0(fd, mayNeedConversion, key.level(), key.name());
@@ -853,7 +862,8 @@ public class Net {
         FAST_LOOPBACK = isFastTcpLoopbackRequested();
 
         IPV6_AVAILABLE = isIPv6Available0();
-        SO_REUSEPORT_AVAILABLE = isReusePortAvailable0();
+        // Scarlet has no SO_REUSEPORT API; do not probe a fabricated option number.
+        SO_REUSEPORT_AVAILABLE = !OperatingSystem.isScarlet() && isReusePortAvailable0();
         SHUTDOWN_WRITE_BEFORE_CLOSE = shouldShutdownWriteBeforeClose0();
     }
 

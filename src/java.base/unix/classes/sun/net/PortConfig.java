@@ -51,6 +51,11 @@ public final class PortConfig {
                 defaultLower = 49152;
                 defaultUpper = 65535;
                 break;
+            case SCARLET:
+                // Matches Scarlet's TCP and UDP ephemeral port allocators.
+                defaultLower = 49152;
+                defaultUpper = 65535;
+                break;
             case AIX:
                 // The ephemeral port is OS version dependent on AIX:
                 // http://publib.boulder.ibm.com/infocenter/aix/v7r1/topic/com.ibm.aix.rsct315.admin/bl503_ephport.htm
